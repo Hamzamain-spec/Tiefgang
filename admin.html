@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Tiefgang</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,500;8..60,600;8..60,700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#F8F6F2;--white:#FFFFFF;--card:#FFFFFF;
+  --ink:#1A2A32;--mid:#2A3A42;
+  --border:#E2DAD0;--border2:#D2C8BC;
+  --accent:#8B6B4D;--accent2:#6B4F38;
+  --accent-light:#F0E8DE;
+  --accent-soft:#B99E84;
+  --muted:#5A6A72;--light:#8A9AA2;
+  --success:#2A6B4D;--success-lt:#E8F2EC;
+  --error:#C45A4D;--error-lt:#FCECEA;
+}
+body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--accent2)}
+.login-box{background:var(--white);padding:64px 56px;width:100%;max-width:480px;position:relative;z-index:10;box-shadow:0 30px 60px -15px rgba(0,0,0,.2);border:1px solid var(--border)}
+.login-logo{margin-bottom:40px;text-align:center}
+.ll-name{font-family:'Source Serif 4',serif;font-size:48px;font-weight:500;color:var(--ink);letter-spacing:-0.5px;line-height:1}
+.ll-name span{color:var(--accent);font-weight:600}
+.ll-sub{font-size:12px;color:var(--accent-soft);letter-spacing:5px;text-transform:uppercase;margin-top:12px}
+.login-sub{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:40px;font-weight:500;text-align:center}
+.field{margin-bottom:24px}
+.field label{display:block;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.field input{width:100%;padding:16px 20px;border:1px solid var(--border);font-size:15px;font-family:'Source Sans 3',sans-serif;outline:none;background:var(--bg);color:var(--ink);transition:border-color .2s;position:relative;z-index:1;pointer-events:auto}
+.field input:focus{border-color:var(--accent);background:var(--white);box-shadow:0 0 0 4px rgba(139,107,77,.1)}
+.field input::placeholder{color:var(--light)}
+.login-btn{width:100%;padding:16px;background:var(--accent);color:#fff;border:none;font-size:14px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Source Sans 3',sans-serif;transition:all .2s;position:relative;z-index:1;pointer-events:auto}
+.login-btn:hover{background:var(--accent2);transform:translateY(-2px);box-shadow:0 10px 20px -8px var(--accent)}
+.login-err{color:var(--error);font-size:14px;margin-top:16px;display:none;font-weight:600;text-align:center}
+.admin-wrap{display:none;min-height:100vh;background:var(--bg)}
+.admin-header{background:var(--white);height:80px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border);box-shadow:0 2px 10px rgba(0,0,0,.02);flex-wrap:wrap;gap:8px}
+.al{display:flex;align-items:center;gap:16px}
+.al-icon{width:48px;height:48px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:22px}
+.al-name{font-family:'Source Serif 4',serif;font-size:34px;font-weight:500;color:var(--ink);letter-spacing:-0.5px}
+.al-name span{color:var(--accent);font-weight:600}
+.admin-nav{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.admin-nav button{background:transparent;border:1px solid var(--border);color:var(--muted);padding:10px 18px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Source Sans 3',sans-serif;transition:all .2s}
+.admin-nav button:hover,.admin-nav button.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.logout-btn{background:transparent;border:none;color:var(--light);font-size:13px;cursor:pointer;font-family:'Source Sans 3',sans-serif;padding:10px 16px;font-weight:500;transition:color .2s}
+.logout-btn:hover{color:var(--ink)}
+.view-btn{display:inline-flex;align-items:center;gap:8px;background:transparent;border:1px solid var(--border);color:var(--muted);padding:10px 18px;text-decoration:none;font-size:13px;font-weight:500;transition:all .2s;margin-left:4px}
+.view-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+.admin-body{max-width:1200px;margin:0 auto;padding:60px 40px}
+.panel{display:none}.panel.active{display:block}
+.panel-title{font-family:'Source Serif 4',serif;font-size:52px;font-weight:500;color:var(--ink);margin-bottom:40px;letter-spacing:-1px}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-bottom:30px}
+.stat-card{background:var(--card);border:1px solid var(--border);padding:32px;position:relative;overflow:hidden;transition:all .2s}
+.stat-card:hover{border-color:var(--accent);box-shadow:0 10px 20px -10px rgba(0,0,0,.05)}
+.stat-card::before{content:'⬇';position:absolute;right:20px;bottom:10px;font-size:32px;color:var(--accent);opacity:.1}
+.stat-num{font-family:'Source Serif 4',serif;font-size:52px;font-weight:500;color:var(--accent);line-height:1;margin-bottom:8px;letter-spacing:-2px}
+.stat-label{font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.dash-welcome{background:var(--accent-light);border:1px solid var(--border);padding:60px;position:relative;overflow:hidden}
+.dash-welcome::after{content:'⬇';font-family:'Source Serif 4',serif;font-size:200px;color:var(--accent);position:absolute;right:20px;bottom:-40px;line-height:1;opacity:.1}
+.dw-kicker{font-size:12px;font-weight:600;letter-spacing:5px;text-transform:uppercase;color:var(--accent2);margin-bottom:16px}
+.dw-title{font-family:'Source Serif 4',serif;font-size:52px;font-weight:500;color:var(--ink);margin-bottom:16px;letter-spacing:-1px;line-height:1.1}
+.dw-sub{font-size:16px;color:var(--muted);margin-bottom:36px;font-weight:400;max-width:600px}
+.dw-btn{display:inline-flex;align-items:center;gap:10px;background:var(--accent);color:#fff;padding:16px 36px;font-size:14px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Source Sans 3',sans-serif;border:none;transition:all .2s}
+.dw-btn:hover{background:var(--accent2);transform:translateY(-2px);box-shadow:0 10px 20px -8px var(--accent)}
+.dw-btn i{font-size:16px}
+.editor-grid{display:grid;grid-template-columns:1fr 280px;gap:30px}
+.editor-main{background:var(--card);border:1px solid var(--border);padding:48px}
+.editor-side{display:flex;flex-direction:column;gap:20px}
+.side-box{background:var(--card);border:1px solid var(--border);padding:28px}
+.side-box h3{font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.title-input{font-family:'Source Serif 4',serif;font-size:42px;font-weight:500;border:none;background:transparent;padding:0;width:100%;outline:none;margin-bottom:12px;color:var(--ink);letter-spacing:-0.5px;line-height:1.15}
+.title-input::placeholder{color:var(--border2)}
+.title-sep{height:1px;background:var(--border);margin-bottom:3px}
+.title-accent{height:3px;width:80px;background:var(--accent);margin-bottom:32px}
+.form-field{margin-bottom:24px}
+.form-field label{display:block;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.form-field input,.form-field select,.form-field textarea{width:100%;padding:14px 18px;border:1px solid var(--border);font-size:14px;font-family:'Source Sans 3',sans-serif;outline:none;transition:border-color .2s;background:var(--bg);color:var(--ink)}
+.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--accent);background:var(--white)}
+#post-content{min-height:400px;resize:vertical;line-height:1.8;font-size:14px;font-weight:300}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+.toolbar button{background:var(--bg);border:1px solid var(--border);padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Source Sans 3',sans-serif;transition:all .2s;color:var(--muted)}
+.toolbar button:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.publish-btn{width:100%;padding:18px;background:var(--accent);color:#fff;border:none;font-size:14px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Source Sans 3',sans-serif;margin-bottom:8px;transition:all .2s}
+.publish-btn:hover{background:var(--accent2);transform:translateY(-2px);box-shadow:0 10px 20px -8px var(--accent)}
+.publish-btn i{margin-right:8px}
+.cancel-btn{width:100%;padding:14px;background:transparent;color:var(--muted);border:1px solid var(--border);font-size:13px;font-weight:500;cursor:pointer;font-family:'Source Sans 3',sans-serif;letter-spacing:1px;text-transform:uppercase;transition:all .2s}
+.cancel-btn:hover{border-color:var(--accent);color:var(--accent)}
+.success-msg{background:var(--success-lt);color:var(--success);border:1px solid var(--success);padding:16px;font-size:13px;font-weight:600;margin-top:20px;display:none;text-align:center;letter-spacing:1.5px;text-transform:uppercase}
+.posts-table{background:var(--card);border:1px solid var(--border);overflow:hidden}
+.posts-table-header{display:grid;grid-template-columns:1fr 140px 120px 140px;padding:16px 20px;background:var(--bg);color:var(--muted);font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.post-row{display:grid;grid-template-columns:1fr 140px 120px 140px;padding:18px 20px;border-bottom:1px solid var(--border);align-items:center;transition:background .2s}
+.post-row:hover{background:var(--bg)}
+.post-row:last-child{border-bottom:none}
+.post-row-title{font-family:'Source Serif 4',serif;font-size:18px;font-weight:500;color:var(--ink);margin-bottom:2px;line-height:1.2}
+.post-row-excerpt{font-size:13px;color:var(--light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:380px}
+.post-row-date{font-size:13px;color:var(--muted)}
+.post-row-cat{font-size:11px;background:var(--accent-light);color:var(--accent);padding:5px 12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;border:1px solid rgba(139,107,77,.2);display:inline-block}
+.row-actions{display:flex;gap:12px}
+.edit-btn{background:transparent;color:var(--muted);border:1px solid var(--border);padding:8px 14px;font-size:12px;font-weight:500;cursor:pointer;font-family:'Source Sans 3',sans-serif;transition:all .2s}
+.edit-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.del-btn{background:transparent;color:var(--error);border:1px solid var(--error);padding:8px 14px;font-size:12px;font-weight:500;cursor:pointer;font-family:'Source Sans 3',sans-serif;transition:all .2s}
+.del-btn:hover{background:var(--error);color:#fff;border-color:var(--error)}
+.empty-posts{text-align:center;padding:100px;color:var(--muted);font-size:15px}
+.preview-box{background:var(--bg);border:1px solid var(--border);padding:20px}
+.preview-title-txt{font-family:'Source Serif 4',serif;font-size:20px;font-weight:500;color:var(--ink);margin-bottom:8px;line-height:1.2}
+.preview-exc{font-size:13px;color:var(--muted);line-height:1.5}
+.gist-config{background:var(--card);border:1px solid var(--border);padding:48px;max-width:800px;margin:0 auto}
+.gist-field{margin-bottom:30px}
+.gist-field label{display:block;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.gist-field input{width:100%;padding:16px 20px;border:1px solid var(--border);font-size:15px;font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--ink)}
+.gist-field input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 4px rgba(139,107,77,.1)}
+.gist-note{background:var(--bg);border-left:3px solid var(--accent);padding:24px;margin:36px 0;font-size:14px;color:var(--muted)}
+.gist-buttons{display:flex;gap:16px;margin-top:36px;flex-wrap:wrap}
+.gist-btn{background:var(--accent);color:#fff;border:none;padding:16px 32px;font-size:14px;font-weight:600;letter-spacing:1px;cursor:pointer;transition:all .2s}
+.gist-btn:hover{background:var(--accent2);transform:translateY(-2px);box-shadow:0 10px 20px -8px var(--accent)}
+.gist-btn.secondary{background:var(--bg);color:var(--ink);border:1px solid var(--border)}
+.gist-btn.secondary:hover{background:var(--border);color:var(--ink);transform:none;box-shadow:none}
+.gist-status{margin-top:24px;padding:16px;display:none;font-size:14px}
+.gist-status.success{background:var(--success-lt);color:var(--success);border:1px solid var(--success);display:block}
+.gist-status.error{background:var(--error-lt);color:var(--error);border:1px solid var(--error);display:block}
+@media(max-width:900px){.stats-row{grid-template-columns:1fr 1fr}.editor-grid{grid-template-columns:1fr}.posts-table-header,.post-row{grid-template-columns:1fr 110px 100px 110px}}
+@media(max-width:600px){.admin-header{height:auto;padding:20px}.stats-row{grid-template-columns:1fr 1fr}.admin-body{padding:30px 20px}.posts-table-header,.post-row{grid-template-columns:1fr auto}}
+</style>
+</head>
+<body>
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="ll-name">Tief<span>gang</span></div>
+      <div class="ll-sub">DAS WESENTLICHE</div>
+    </div>
+    <div class="login-sub">REDAKTION · ADMIN</div>
+    <div class="field"><label>PASSWORT</label><input type="password" id="pw-input" placeholder="Passwort eingeben..." onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="login-btn" onclick="doLogin()"><i class="fas fa-arrow-right" style="margin-right:8px"></i>ANMELDEN</button>
+    <div class="login-err" id="login-err">⚠ FALSCHES PASSWORT</div>
+  </div>
+</div>
+<div class="admin-wrap" id="admin-panel">
+  <div class="admin-header">
+    <div class="al">
+      <div class="al-icon"><i class="fas fa-water"></i></div>
+      <div class="al-name">Tief<span>gang</span></div>
+    </div>
+    <div class="admin-nav">
+      <button class="active" onclick="showPanel('dashboard',this)"><i class="fas fa-chart-pie" style="margin-right:6px"></i>DASHBOARD</button>
+      <button onclick="showPanel('new-post',this)"><i class="fas fa-pen" style="margin-right:6px"></i>NEUER ARTIKEL</button>
+      <button onclick="showPanel('all-posts',this)"><i class="fas fa-list" style="margin-right:6px"></i>ALLE ARTIKEL</button>
+      <button onclick="showPanel('gist-config',this)"><i class="fas fa-cog" style="margin-right:6px"></i>GIST CONFIG</button>
+      <a href="index.html" target="_blank" class="view-btn"><i class="fas fa-external-link-alt" style="margin-right:6px"></i>WEBSITE</a>
+      <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt" style="margin-right:6px"></i>ABMELDEN</button>
+    </div>
+  </div>
+  <div class="admin-body">
+    <div class="panel active" id="panel-dashboard">
+      <div class="panel-title">DASHBOARD</div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">ARTIKEL GESAMT</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-today">0</div><div class="stat-label">HEUTE PUBLIZIERT</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-cats">0</div><div class="stat-label">KATEGORIEN</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-words">—</div><div class="stat-label">Ø WÖRTER</div></div>
+      </div>
+      <div class="dash-welcome">
+        <div class="dw-kicker"><i class="fas fa-water"></i> TIEFGANG REDAKTION</div>
+        <div class="dw-title">IN DIE TIEFE GEHEN.</div>
+        <div class="dw-sub">Das Magazin für gründliche Recherche, fundierte Analysen und Wesentliches.</div>
+        <button class="dw-btn" onclick="showPanel('new-post',document.querySelector('.admin-nav button:nth-child(2)'))"><i class="fas fa-pen"></i>ARTIKEL SCHREIBEN</button>
+      </div>
+    </div>
+    <div class="panel" id="panel-new-post">
+      <div class="panel-title" id="editor-mode-title">NEUER ARTIKEL</div>
+      <div class="editor-grid">
+        <div class="editor-main">
+          <input class="title-input" type="text" id="post-title" placeholder="TITEL EINGEBEN...">
+          <div class="title-sep"></div><div class="title-accent"></div>
+          <div class="toolbar">
+            <button onclick="fmt('bold')"><i class="fas fa-bold"></i></button>
+            <button onclick="fmt('italic')"><i class="fas fa-italic"></i></button>
+            <button onclick="wrapTag('h2')">H2</button>
+            <button onclick="wrapTag('h3')">H3</button>
+            <button onclick="wrapTag('blockquote')"><i class="fas fa-quote-right"></i></button>
+            <button onclick="insertLink()"><i class="fas fa-link"></i></button>
+            <button onclick="wrapTag('ul')"><i class="fas fa-list-ul"></i></button>
+            <button onclick="wrapTag('p')"><i class="fas fa-paragraph"></i></button>
+          </div>
+          <div class="form-field"><textarea id="post-content" placeholder="ARTIKELINHALT HIER EINGEBEN... HTML WIRD UNTERSTÜTZT."></textarea></div>
+        </div>
+        <div class="editor-side">
+          <div class="side-box"><h3>VERÖFFENTLICHEN</h3>
+            <button class="publish-btn" onclick="publishPost()"><i class="fas fa-check"></i>VERÖFFENTLICHEN</button>
+            <button class="cancel-btn" onclick="clearEditor()"><i class="fas fa-undo-alt" style="margin-right:6px"></i>ZURÜCKSETZEN</button>
+            <div class="success-msg" id="success-msg">✅ VERÖFFENTLICHT</div>
+          </div>
+          <div class="side-box"><h3>DETAILS</h3>
+            <div class="form-field"><label>KATEGORIE</label>
+              <select id="post-cat">
+                <option>POLITIK</option><option>GESELLSCHAFT</option><option>KULTUR</option>
+                <option>WISSENSCHAFT</option><option>PHILOSOPHIE</option><option>GESCHICHTE</option>
+                <option>WIRTSCHAFT</option><option>ÖKOLOGIE</option><option>ALLGEMEIN</option>
+              </select>
+            </div>
+            <div class="form-field"><label>AUTOR</label><input type="text" id="post-author" value="TIEFGANG REDAKTION"></div>
+          </div>
+          <div class="side-box"><h3>VORSCHAU</h3>
+            <div class="preview-box">
+              <div class="preview-title-txt" id="preview-title">TITEL...</div>
+              <div class="preview-exc" id="preview-excerpt">INHALT...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel" id="panel-all-posts">
+      <div class="panel-title">ALLE ARTIKEL</div>
+      <div class="posts-table">
+        <div class="posts-table-header"><div>TITEL</div><div>DATUM</div><div>KATEGORIE</div><div>AKTIONEN</div></div>
+        <div id="posts-list"></div>
+      </div>
+    </div>
+    <div class="panel" id="panel-gist-config">
+      <div class="panel-title">GIST KONFIGURATION</div>
+      <div class="gist-config">
+        <div class="gist-note">
+          <strong><i class="fas fa-code" style="margin-right:8px"></i>GIST ID:</strong> 42ea11087f40fdba423f8eb0f575ac96<br>
+          <strong><i class="fas fa-tag" style="margin-right:8px"></i>SITE NAME:</strong> tiefgang<br>
+          <small style="display:block;margin-top:12px;color:var(--muted)">Alle Artikel werden mit diesem Site-Namen gekennzeichnet.</small>
+        </div>
+        
+        <div class="gist-field">
+          <label><i class="fas fa-key" style="margin-right:6px"></i>GITHUB TOKEN</label>
+          <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+        </div>
+        
+        <div class="gist-field">
+          <label><i class="fas fa-user" style="margin-right:6px"></i>GITHUB BENUTZERNAME</label>
+          <input type="text" id="github-username" value="Hamzamain-spec" placeholder="GitHub Username">
+        </div>
+        
+        <div class="gist-buttons">
+          <button class="gist-btn" onclick="testGistConnection()"><i class="fas fa-plug" style="margin-right:8px"></i>VERBINDUNG TESTEN</button>
+          <button class="gist-btn secondary" onclick="saveGistConfig()"><i class="fas fa-save" style="margin-right:8px"></i>CONFIG SPEICHERN</button>
+          <button class="gist-btn secondary" onclick="migrateLocalToGist()"><i class="fas fa-upload" style="margin-right:8px"></i>LOKALE MIGRIEREN</button>
+        </div>
+        
+        <div id="gist-status" class="gist-status"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+// Constants
+const PASS = 'germanadmin00#hamzauthority1';
+const GIST_ID = '42ea11087f40fdba423f8eb0f575ac96';
+const SITE_NAME = 'tiefgang';
+const CONFIG_KEY = 'gist_config_tiefgang';
+
+let editingId = null;
+let gistConfig = null;
+
+// Load saved config on startup
+try {
+  const saved = localStorage.getItem(CONFIG_KEY);
+  if (saved) {
+    gistConfig = JSON.parse(saved);
+    document.getElementById('github-token').value = gistConfig.token || '';
+    document.getElementById('github-username').value = gistConfig.username || 'Hamzamain-spec';
+  }
+} catch (e) {}
+
+// Login functions
+function doLogin() {
+  if (document.getElementById('pw-input').value === PASS) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-panel').style.display = 'block';
+    loadDashboard();
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+    document.getElementById('pw-input').value = '';
+  }
+}
+
+function logout() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('pw-input').value = '';
+}
+
+function showPanel(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.admin-nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  
+  if (name === 'all-posts') loadPostsList();
+  if (name === 'dashboard') loadDashboard();
+  if (name === 'new-post') {
+    editingId = null;
+    clearEditor();
+  }
+  if (name === 'gist-config') {
+    document.getElementById('github-token').value = gistConfig?.token || '';
+    document.getElementById('github-username').value = gistConfig?.username || 'Hamzamain-spec';
+  }
+}
+
+// Gist API Functions
+async function getPostsFromGist() {
+  const rawUrl = `https://gist.githubusercontent.com/Hamzamain-spec/${GIST_ID}/raw/posts.json`;
+  try {
+    const response = await fetch(rawUrl);
+    if (!response.ok) return [];
+    const data = await response.json();
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.error('Error fetching from Gist:', e);
+    return [];
+  }
+}
+
+async function savePostsToGist(posts) {
+  if (!gistConfig?.token) {
+    showGistStatus('Bitte zuerst GitHub Token speichern', 'error');
+    return false;
+  }
+
+  // First get the current gist to get the file SHA
+  const gistResponse = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+    headers: {
+      'Authorization': `token ${gistConfig.token}`,
+      'Accept': 'application/vnd.github.v3+json'
+    }
+  });
+
+  if (!gistResponse.ok) {
+    showGistStatus('Fehler beim Abrufen der Gist-Info', 'error');
+    return false;
+  }
+
+  const gistData = await gistResponse.json();
+  const currentFile = gistData.files['posts.json'];
+  const sha = currentFile ? currentFile.sha : null;
+
+  // Update the gist
+  const updateResponse = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+    method: 'PATCH',
+    headers: {
+      'Authorization': `token ${gistConfig.token}`,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      files: {
+        'posts.json': {
+          content: JSON.stringify(posts, null, 2),
+          ...(sha && { sha })
+        }
+      }
+    })
+  });
+
+  if (updateResponse.ok) {
+    showGistStatus('✅ Erfolgreich zu Gist gespeichert!', 'success');
+    return true;
+  } else {
+    const error = await updateResponse.json();
+    showGistStatus(`Fehler: ${error.message || 'Unbekannter Fehler'}`, 'error');
+    return false;
+  }
+}
+
+function showGistStatus(message, type) {
+  const statusDiv = document.getElementById('gist-status');
+  statusDiv.textContent = message;
+  statusDiv.className = `gist-status ${type}`;
+  setTimeout(() => {
+    statusDiv.style.display = 'none';
+  }, 5000);
+}
+
+async function testGistConnection() {
+  const token = document.getElementById('github-token').value;
+  const username = document.getElementById('github-username').value;
+  
+  if (!token) {
+    showGistStatus('Bitte GitHub Token eingeben', 'error');
+    return;
+  }
+
+  try {
+    const response = await fetch('https://api.github.com/user', {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (response.ok) {
+      const user = await response.json();
+      showGistStatus(`✅ Verbunden als ${user.login}`, 'success');
+    } else {
+      showGistStatus('❌ Ungültiger Token', 'error');
+    }
+  } catch (e) {
+    showGistStatus('❌ Verbindungsfehler', 'error');
+  }
+}
+
+function saveGistConfig() {
+  const token = document.getElementById('github-token').value;
+  const username = document.getElementById('github-username').value;
+  
+  gistConfig = { token, username };
+  localStorage.setItem(CONFIG_KEY, JSON.stringify(gistConfig));
+  showGistStatus('✅ Konfiguration gespeichert', 'success');
+}
+
+async function migrateLocalToGist() {
+  const localPosts = getLocalPosts();
+  if (!localPosts.length) {
+    showGistStatus('Keine lokalen Artikel zum Migrieren', 'error');
+    return;
+  }
+
+  // Add site name to local posts
+  const postsWithSite = localPosts.map(post => ({
+    ...post,
+    site: SITE_NAME
+  }));
+
+  const gistPosts = await getPostsFromGist();
+  
+  // Filter out any existing posts from this site (to avoid duplicates)
+  const otherPosts = gistPosts.filter(p => p.site !== SITE_NAME);
+  
+  // Combine and save
+  const allPosts = [...otherPosts, ...postsWithSite];
+  const success = await savePostsToGist(allPosts);
+  
+  if (success) {
+    showGistStatus(`✅ ${localPosts.length} Artikel migriert`, 'success');
+  }
+}
+
+// Post management functions (modified for Gist)
+async function getPosts() {
+  const gistPosts = await getPostsFromGist();
+  return gistPosts.filter(p => p.site === SITE_NAME);
+}
+
+function getLocalPosts() {
+  return JSON.parse(localStorage.getItem('db_posts') || '[]');
+}
+
+async function savePosts(posts) {
+  // First add site name to all posts
+  const postsWithSite = posts.map(post => ({
+    ...post,
+    site: SITE_NAME
+  }));
+
+  // Get current all posts from gist
+  const allGistPosts = await getPostsFromGist();
+  
+  // Remove this site's posts and add the new ones
+  const otherPosts = allGistPosts.filter(p => p.site !== SITE_NAME);
+  const updatedAllPosts = [...otherPosts, ...postsWithSite];
+  
+  return await savePostsToGist(updatedAllPosts);
+}
+
+async function publishPost() {
+  const title = document.getElementById('post-title').value.trim();
+  const content = document.getElementById('post-content').value.trim();
+  
+  if (!title || !content) {
+    alert('Bitte Titel und Inhalt eingeben!');
+    return;
+  }
+
+  const posts = await getPosts();
+  
+  if (editingId) {
+    const idx = posts.findIndex(p => p.id == editingId);
+    if (idx > -1) {
+      posts[idx].title = title;
+      posts[idx].content = content;
+      posts[idx].category = document.getElementById('post-cat').value;
+      posts[idx].author = document.getElementById('post-author').value;
+    }
+  } else {
+    posts.push({
+      id: Date.now(),
+      title,
+      content,
+      category: document.getElementById('post-cat').value,
+      author: document.getElementById('post-author').value || 'Redaktion',
+      date: new Date().toISOString(),
+      site: SITE_NAME
+    });
+  }
+
+  const success = await savePosts(posts);
+  
+  if (success) {
+    const msg = document.getElementById('success-msg');
+    msg.textContent = editingId ? '✅ AKTUALISIERT' : '✅ VERÖFFENTLICHT';
+    msg.style.display = 'block';
+    setTimeout(() => {
+      msg.style.display = 'none';
+      clearEditor();
+    }, 2000);
+    editingId = null;
+  }
+}
+
+function clearEditor() {
+  document.getElementById('post-title').value = '';
+  document.getElementById('post-content').value = '';
+  document.getElementById('post-cat').value = 'POLITIK';
+  document.getElementById('post-author').value = 'TIEFGANG REDAKTION';
+  document.getElementById('preview-title').textContent = 'TITEL...';
+  document.getElementById('preview-excerpt').textContent = 'INHALT...';
+  document.getElementById('editor-mode-title').textContent = 'NEUER ARTIKEL';
+  editingId = null;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('post-title').addEventListener('input', e => {
+    document.getElementById('preview-title').textContent = e.target.value || 'TITEL...';
+  });
+  document.getElementById('post-content').addEventListener('input', e => {
+    const t = e.target.value.replace(/<[^>]+>/g, '').substring(0, 90);
+    document.getElementById('preview-excerpt').textContent = t ? t + '...' : 'INHALT...';
+  });
+});
+
+function fmt(cmd) {
+  const ta = document.getElementById('post-content');
+  const s = ta.selectionStart;
+  const e = ta.selectionEnd;
+  const sel = ta.value.substring(s, e) || 'Text';
+  const tag = cmd === 'bold' ? 'strong' : 'em';
+  ta.value = ta.value.substring(0, s) + `<${tag}>${sel}</${tag}>` + ta.value.substring(e);
+}
+
+function wrapTag(tag) {
+  const ta = document.getElementById('post-content');
+  const s = ta.selectionStart;
+  const e = ta.selectionEnd;
+  const sel = ta.value.substring(s, e) || 'Text hier';
+  const w = tag === 'ul' ? `<ul>\n  <li>${sel}</li>\n</ul>` : `<${tag}>${sel}</${tag}>`;
+  ta.value = ta.value.substring(0, s) + w + ta.value.substring(e);
+}
+
+function insertLink() {
+  const url = prompt('URL:');
+  if (!url) return;
+  const ta = document.getElementById('post-content');
+  const s = ta.selectionStart;
+  const e = ta.selectionEnd;
+  const sel = ta.value.substring(s, e) || 'Linktext';
+  ta.value = ta.value.substring(0, s) + `<a href="${url}">${sel}</a>` + ta.value.substring(e);
+}
+
+async function loadPostsList() {
+  const posts = await getPosts();
+  const el = document.getElementById('posts-list');
+  
+  if (!posts.length) {
+    el.innerHTML = '<div class="empty-posts">Noch keine Artikel vorhanden.</div>';
+    return;
+  }
+
+  el.innerHTML = posts.slice().reverse().map(p => {
+    const date = new Date(p.date).toLocaleDateString('de-DE');
+    const excerpt = p.content.replace(/<[^>]+>/g, '').substring(0, 55);
+    return `<div class="post-row">
+      <div>
+        <div class="post-row-title">${p.title}</div>
+        <div class="post-row-excerpt">${excerpt}...</div>
+      </div>
+      <div class="post-row-date">${date}</div>
+      <div><span class="post-row-cat">${p.category || 'ALLGEMEIN'}</span></div>
+      <div class="row-actions">
+        <button class="edit-btn" onclick="editPost(${p.id})"><i class="fas fa-edit" style="margin-right:4px"></i>EDIT</button>
+        <button class="del-btn" onclick="deletePost(${p.id})"><i class="fas fa-trash-alt" style="margin-right:4px"></i>DEL</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function editPost(id) {
+  const posts = await getPosts();
+  const post = posts.find(p => p.id == id);
+  if (!post) return;
+  
+  editingId = id;
+  document.getElementById('post-title').value = post.title;
+  document.getElementById('post-content').value = post.content;
+  document.getElementById('post-cat').value = post.category || 'POLITIK';
+  document.getElementById('post-author').value = post.author || 'REDAKTION';
+  document.getElementById('editor-mode-title').textContent = 'ARTIKEL BEARBEITEN';
+  document.getElementById('preview-title').textContent = post.title;
+  showPanel('new-post', document.querySelector('.admin-nav button:nth-child(2)'));
+}
+
+async function deletePost(id) {
+  if (!confirm('Löschen?')) return;
+  
+  const posts = await getPosts();
+  const updatedPosts = posts.filter(p => p.id != id);
+  await savePosts(updatedPosts);
+  loadPostsList();
+  loadDashboard();
+}
+
+async function loadDashboard() {
+  const posts = await getPosts();
+  
+  document.getElementById('stat-total').textContent = posts.length;
+  
+  const today = new Date().toDateString();
+  document.getElementById('stat-today').textContent = posts.filter(p => 
+    new Date(p.date).toDateString() === today
+  ).length;
+  
+  document.getElementById('stat-cats').textContent = new Set(posts.map(p => p.category)).size;
+  
+  if (posts.length) {
+    const avg = Math.round(posts.reduce((a, p) => 
+      a + p.content.replace(/<[^>]+>/g, '').split(' ').length, 0
+    ) / posts.length);
+    document.getElementById('stat-words').textContent = avg;
+  }
+}
+</script>
+</body>
+</html>
